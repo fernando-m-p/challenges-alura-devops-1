@@ -1,0 +1,25 @@
+version: '3'
+services:
+  web:
+    build: .
+    environment:
+      MYENV: EXAMPLE
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD}
+    volumes:
+      - .:/usr/src/app
+  web_migrate:
+    extends:
+      service: web
+    command: python manage.py migrate 
+  web_createuser:
+    extends:
+      service: web
+    depends_on:
+      - web_migrate
+    command: python manage.py createsuperuser --username ${DJANGO_SUPERUSER_USERNAME} --email ${DJANGO_SUPERUSER_EMAIL} --skip-checks --noinput
+  web_run:
+    extends:
+      service: web
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
